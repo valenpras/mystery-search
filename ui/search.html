@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Search — Mystery Search</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <div class="top-bar">
+        <a class="logo" href="/">Mystery Search</a>
+      </div>
+
+      <form class="search-form" id="search-form">
+        <input type="search" id="q" name="q" required autocomplete="off" />
+        <button type="submit" id="submit-btn">Search</button>
+      </form>
+
+      <details class="advanced" id="advanced-panel">
+        <summary>Filters</summary>
+        <div class="advanced-grid">
+          <label>
+            Country / location
+            <input type="text" id="filter-country" />
+          </label>
+          <label>
+            Category
+            <select id="filter-category">
+              <option value="">Any</option>
+            </select>
+          </label>
+        </div>
+      </details>
+
+      <p class="meta-line" id="meta-line"></p>
+      <div id="results-root">
+        <div class="loading" id="loading">Searching…</div>
+      </div>
+
+      <p class="footer-note"><a href="/">New search</a></p>
+    </div>
+    <script src="/js/config.js"></script>
+    <script src="/js/search.js"></script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const qInput = document.getElementById("q");
+      const countryInput = document.getElementById("filter-country");
+      const categorySelect = document.getElementById("filter-category");
+      const resultsRoot = document.getElementById("results-root");
+      const metaLine = document.getElementById("meta-line");
+      const submitBtn = document.getElementById("submit-btn");
+
+      BROWSE_CATEGORIES.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.value;
+        opt.textContent = c.label;
+        categorySelect.appendChild(opt);
+      });
+
+      qInput.value = params.get("q") || "";
+      countryInput.value = params.get("country") || "";
+      categorySelect.value = params.get("category") || "";
+
+      async function executeSearch() {
+        const q = qInput.value.trim();
+        if (!q) return;
+
+        submitBtn.disabled = true;
+        resultsRoot.innerHTML =
+          '<div class="loading"><div class="skeleton"></div><div class="skeleton"></div></div>';
+        metaLine.textContent = "";
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("q", q);
+        if (countryInput.value.trim()) {
+          url.searchParams.set("country", countryInput.value.trim());
+        } else {
+          url.searchParams.delete("country");
+        }
+        if (categorySelect.value) {
+          url.searchParams.set("category", categorySelect.value);
+        } else {
+          url.searchParams.delete("category");
+        }
+        window.history.replaceState({}, "", url);
+
+        try {
+          const data = await runSearch(q, {
+            country: countryInput.value.trim() || undefined,
+            category: categorySelect.value || undefined,
+          });
+          metaLine.textContent = `${data.total} result(s) · ${data.took_ms} ms · ${data.source}`;
+          resultsRoot.innerHTML = "";
+          renderResultsList(data, resultsRoot);
+        } catch (err) {
+          resultsRoot.innerHTML = "";
+          const box = document.createElement("div");
+          box.className = "alert alert-error";
+          box.textContent = err.message || "Search failed.";
+          resultsRoot.appendChild(box);
+        } finally {
+          submitBtn.disabled = false;
+        }
+      }
+
+      document.getElementById("search-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        executeSearch();
+      });
+
+      if (qInput.value.trim()) {
+        executeSearch();
+      } else {
+        resultsRoot.innerHTML = "";
+        metaLine.textContent = "Enter a query to search.";
+      }
+    </script>
+  </body>
+</html>

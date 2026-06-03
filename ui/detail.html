@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Case — Mystery Search</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <div class="top-bar">
+        <a class="logo" href="/">Mystery Search</a>
+        <a href="javascript:history.back()">Back to results</a>
+      </div>
+
+      <div class="detail-box" id="detail-root">
+        <p class="loading">Loading…</p>
+      </div>
+    </div>
+    <script src="/js/search.js"></script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const docId = params.get("doc_id");
+      const root = document.getElementById("detail-root");
+
+      if (!docId) {
+        root.innerHTML =
+          '<p class="alert alert-warn">Missing <code>doc_id</code> in URL.</p>';
+      } else {
+        const title = docId.startsWith("wikipedia:")
+          ? decodeURIComponent(docId.slice("wikipedia:".length))
+          : docId;
+        root.innerHTML = `
+          <h1>${escapeHtml(title)}</h1>
+          <p class="snippet">Full case view coming soon. This stub confirms in-app navigation via <code>doc_id</code>.</p>
+          <p><span class="badge badge-wiki">Wikipedia</span></p>
+          <p class="footer-note">Document id: <code>${escapeHtml(docId)}</code></p>
+        `;
+      }
+    </script>
+  </body>
+</html>

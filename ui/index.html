@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mystery Search</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="brand">
+        <h1>Mystery Search</h1>
+        <p>
+          Search unsolved crimes and mysteries from English Wikipedia — built
+          for Web Information Retrieval.
+        </p>
+        <p class="stats">Wikipedia corpus · Elasticsearch BM25</p>
+      </header>
+
+      <form class="search-form" id="home-search" action="search.html" method="get">
+        <input
+          type="search"
+          name="q"
+          id="q"
+          placeholder="Search cases, places, people…"
+          autocomplete="off"
+          required
+        />
+        <button type="submit">Search</button>
+      </form>
+
+      <p class="section-title">Try an example</p>
+      <div class="chips" id="example-chips"></div>
+
+      <p class="section-title">Browse by category</p>
+      <div class="categories" id="category-grid"></div>
+
+      <details class="advanced">
+        <summary>Advanced search</summary>
+        <div class="advanced-grid">
+          <label>
+            Country / location (exact)
+            <input type="text" name="country" id="adv-country" placeholder="United States" />
+          </label>
+          <label>
+            Category tag
+            <select name="category" id="adv-category">
+              <option value="">Any</option>
+            </select>
+          </label>
+        </div>
+      </details>
+
+      <p class="footer-note">
+        Mystery Search · Wikipedia index · Unsolved.com corpus coming later
+      </p>
+    </div>
+    <script src="/js/config.js"></script>
+    <script src="/js/search.js"></script>
+    <script>
+      const form = document.getElementById("home-search");
+      const chipsEl = document.getElementById("example-chips");
+      const catGrid = document.getElementById("category-grid");
+      const catSelect = document.getElementById("adv-category");
+
+      EXAMPLE_QUERIES.forEach((q) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip";
+        b.textContent = q;
+        b.addEventListener("click", () => goToSearch(q));
+        chipsEl.appendChild(b);
+      });
+
+      BROWSE_CATEGORIES.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.value;
+        opt.textContent = c.label;
+        catSelect.appendChild(opt);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "cat-btn";
+        btn.textContent = c.label;
+        btn.addEventListener("click", () =>
+          goToSearch(c.label, { category: c.value })
+        );
+        catGrid.appendChild(btn);
+      });
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const q = document.getElementById("q").value;
+        const country = document.getElementById("adv-country").value.trim();
+        const category = document.getElementById("adv-category").value;
+        goToSearch(q, { country: country || undefined, category: category || undefined });
+      });
+    </script>
+  </body>
+</html>
