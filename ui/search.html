@@ -4,36 +4,66 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Search — Mystery Search</title>
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon" />
+    <link rel="preload" href="/assets/background_homepage.png" as="image" />
+    <link rel="preload" href="/assets/paper_texture.png" as="image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Special+Elite&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
-    <div class="shell">
-      <div class="top-bar">
-        <a class="logo" href="/">Mystery Search</a>
-      </div>
+  <body class="page-search">
+    <div class="shell search-shell">
+      <header class="search-header">
+        <a class="search-header-logo" href="/">
+          <img
+            src="/assets/header_logo.svg"
+            alt="Mystery Search"
+            width="550"
+            height="120"
+          />
+        </a>
+        <form class="search-form search-header-form" id="search-form">
+          <input
+            type="search"
+            id="q"
+            name="q"
+            required
+            autocomplete="off"
+            placeholder="Search mysteries…"
+            aria-label="Search"
+          />
+          <button type="submit" id="submit-btn">Search</button>
+        </form>
 
-      <form class="search-form" id="search-form">
-        <input type="search" id="q" name="q" required autocomplete="off" />
-        <button type="submit" id="submit-btn">Search</button>
-      </form>
+        <details class="advanced search-header-filters" id="advanced-panel">
+          <summary>Advanced search</summary>
+          <div class="advanced-grid">
+            <label>
+              Country
+              <select id="filter-country" class="filter-country">
+                <option value="">Any</option>
+              </select>
+            </label>
+            <label>
+              Category
+              <select id="filter-category">
+                <option value="">Any</option>
+              </select>
+            </label>
+            <label>
+              Case status
+              <select id="filter-case-status">
+                <option value="">Any</option>
+              </select>
+            </label>
+          </div>
+        </details>
+      </header>
 
-      <details class="advanced" id="advanced-panel">
-        <summary>Filters</summary>
-        <div class="advanced-grid">
-          <label>
-            Country / location
-            <input type="text" id="filter-country" />
-          </label>
-          <label>
-            Category
-            <select id="filter-category">
-              <option value="">Any</option>
-            </select>
-          </label>
-        </div>
-      </details>
-
-      <p class="meta-line" id="meta-line"></p>
       <div id="results-root">
         <div class="loading" id="loading">Searching…</div>
       </div>
@@ -45,11 +75,19 @@
     <script>
       const params = new URLSearchParams(window.location.search);
       const qInput = document.getElementById("q");
-      const countryInput = document.getElementById("filter-country");
+      const countrySelect = document.getElementById("filter-country");
       const categorySelect = document.getElementById("filter-category");
+      const caseStatusSelect = document.getElementById("filter-case-status");
       const resultsRoot = document.getElementById("results-root");
-      const metaLine = document.getElementById("meta-line");
       const submitBtn = document.getElementById("submit-btn");
+
+      let offset = 0;
+      let hasMore = false;
+      let loadingMore = false;
+      let loadObserver = null;
+
+      populateCountrySelect(countrySelect, params.get("country") || "");
+      populateCaseStatusSelect(caseStatusSelect, params.get("case_status") || "");
 
       BROWSE_CATEGORIES.forEach((c) => {
         const opt = document.createElement("option");
@@ -59,22 +97,127 @@
       });
 
       qInput.value = params.get("q") || "";
-      countryInput.value = params.get("country") || "";
       categorySelect.value = params.get("category") || "";
+      caseStatusSelect.value = params.get("case_status") || "";
+
+      function getSearchOptions() {
+        return {
+          country: countrySelect.value || undefined,
+          category: categorySelect.value || undefined,
+          case_status: caseStatusSelect.value || undefined,
+          size: SEARCH_PAGE_SIZE,
+        };
+      }
+
+      function setLoadMoreVisible(visible) {
+        let indicator = document.getElementById("load-more-indicator");
+        if (!visible) {
+          if (indicator) indicator.hidden = true;
+          return;
+        }
+        if (!indicator) {
+          indicator = document.createElement("p");
+          indicator.id = "load-more-indicator";
+          indicator.className = "load-more-indicator";
+          indicator.textContent = "Loading more…";
+        }
+        const sentinel = document.getElementById("load-more-sentinel");
+        if (sentinel) {
+          resultsRoot.insertBefore(indicator, sentinel);
+        } else {
+          resultsRoot.appendChild(indicator);
+        }
+        indicator.hidden = false;
+      }
+
+      function ensureSentinel() {
+        let sentinel = document.getElementById("load-more-sentinel");
+        if (!sentinel) {
+          sentinel = document.createElement("div");
+          sentinel.id = "load-more-sentinel";
+          sentinel.className = "load-more-sentinel";
+          sentinel.setAttribute("aria-hidden", "true");
+          resultsRoot.appendChild(sentinel);
+        }
+        return sentinel;
+      }
+
+      function bindLoadObserver() {
+        if (loadObserver) {
+          loadObserver.disconnect();
+          loadObserver = null;
+        }
+        if (!hasMore) {
+          const sentinel = document.getElementById("load-more-sentinel");
+          if (sentinel) sentinel.remove();
+          return;
+        }
+        const sentinel = ensureSentinel();
+        loadObserver = new IntersectionObserver(
+          (entries) => {
+            if (entries[0].isIntersecting && hasMore && !loadingMore) {
+              loadMoreResults();
+            }
+          },
+          { rootMargin: "200px" }
+        );
+        loadObserver.observe(sentinel);
+      }
+
+      function applySearchResponse(data, { append }) {
+        const outcome = renderResultsList(data, resultsRoot, { append });
+        if (!append) {
+          offset = data.results ? data.results.length : 0;
+        } else {
+          offset += data.results ? data.results.length : 0;
+        }
+        hasMore = outcome.hasMore;
+        bindLoadObserver();
+      }
+
+      async function loadMoreResults() {
+        const q = qInput.value.trim();
+        if (!q || !hasMore || loadingMore) return;
+
+        loadingMore = true;
+        setLoadMoreVisible(true);
+        try {
+          const data = await runSearch(q, {
+            ...getSearchOptions(),
+            from: offset,
+          });
+          applySearchResponse(data, { append: true });
+        } catch (err) {
+          hasMore = false;
+          bindLoadObserver();
+          const box = document.createElement("div");
+          box.className = "alert alert-error";
+          box.textContent = err.message || "Could not load more results.";
+          resultsRoot.appendChild(box);
+        } finally {
+          loadingMore = false;
+          setLoadMoreVisible(false);
+        }
+      }
 
       async function executeSearch() {
         const q = qInput.value.trim();
         if (!q) return;
 
         submitBtn.disabled = true;
+        offset = 0;
+        hasMore = false;
+        if (loadObserver) {
+          loadObserver.disconnect();
+          loadObserver = null;
+        }
         resultsRoot.innerHTML =
           '<div class="loading"><div class="skeleton"></div><div class="skeleton"></div></div>';
-        metaLine.textContent = "";
 
         const url = new URL(window.location.href);
         url.searchParams.set("q", q);
-        if (countryInput.value.trim()) {
-          url.searchParams.set("country", countryInput.value.trim());
+        if (countrySelect.value) {
+          url.searchParams.set("country", countrySelect.value);
         } else {
           url.searchParams.delete("country");
         }
@@ -83,16 +226,17 @@
         } else {
           url.searchParams.delete("category");
         }
+        if (caseStatusSelect.value) {
+          url.searchParams.set("case_status", caseStatusSelect.value);
+        } else {
+          url.searchParams.delete("case_status");
+        }
         window.history.replaceState({}, "", url);
 
         try {
-          const data = await runSearch(q, {
-            country: countryInput.value.trim() || undefined,
-            category: categorySelect.value || undefined,
-          });
-          metaLine.textContent = `${data.total} result(s) · ${data.took_ms} ms · ${data.source}`;
+          const data = await runSearch(q, getSearchOptions());
           resultsRoot.innerHTML = "";
-          renderResultsList(data, resultsRoot);
+          applySearchResponse(data, { append: false });
         } catch (err) {
           resultsRoot.innerHTML = "";
           const box = document.createElement("div");
@@ -113,7 +257,6 @@
         executeSearch();
       } else {
         resultsRoot.innerHTML = "";
-        metaLine.textContent = "Enter a query to search.";
       }
     </script>
   </body>

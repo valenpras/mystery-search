@@ -8,3 +8,6 @@ data/
 cleaning_pages_db_*.json
 Crawl1.ipynb
 crawl.ipynb
+Try_Elastic_Search.ipynb
+Try_Elastic_Search_v2.ipynb
+Try_Elastic_Search3.ipynb

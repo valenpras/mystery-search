@@ -45,6 +45,10 @@ class Settings:
     elastic_endpoint: str
     elastic_api_key: str
     index_name: str
+    embedding_model: str
+    elastic_request_timeout: float
+    elastic_search_max_retries: int
+    elastic_search_retry_backoff_sec: float
     default_size: int
     snippet_max_len: int
     low_score_threshold: float
@@ -60,11 +64,23 @@ def get_settings() -> Settings:
     return Settings(
         elastic_endpoint=os.environ.get("ELASTIC_ENDPOINT", DEFAULT_ELASTIC_ENDPOINT),
         elastic_api_key=os.environ.get("ELASTIC_API_KEY", "").strip(),
-        index_name=os.environ.get("ELASTIC_INDEX", "pages"),
+        index_name=os.environ.get("ELASTIC_INDEX", "wiki_enrich_2order"),
+        embedding_model=os.environ.get(
+            "SEARCH_EMBEDDING_MODEL", "all-MiniLM-L6-v2"
+        ),
+        elastic_request_timeout=float(
+            os.environ.get("ELASTIC_REQUEST_TIMEOUT", "20")
+        ),
+        elastic_search_max_retries=int(
+            os.environ.get("ELASTIC_SEARCH_MAX_RETRIES", "2")
+        ),
+        elastic_search_retry_backoff_sec=float(
+            os.environ.get("ELASTIC_SEARCH_RETRY_BACKOFF_SEC", "0.5")
+        ),
         default_size=20,
         snippet_max_len=320,
         low_score_threshold=float(
-            os.environ.get("SEARCH_LOW_SCORE_THRESHOLD", "3.0")
+            os.environ.get("SEARCH_LOW_SCORE_THRESHOLD", "0.01")
         ),
         ui_dir=UI_DIR,
     )

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 250" width="100%" height="100%" role="img" aria-label="Mystery Search">
+  <defs>
+    <filter id="casefile-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+
+    <linearGradient id="brassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#B45309" />
+      <stop offset="100%" stop-color="#78350F" />
+    </linearGradient>
+
+    <linearGradient id="brass3d" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#78350F" />
+      <stop offset="25%" stop-color="#F59E0B" />
+      <stop offset="75%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#451A03" />
+    </linearGradient>
+  </defs>
+
+  <style>
+    .text-title-base {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: bold;
+      font-size: 28px;
+      letter-spacing: 4px;
+    }
+    .text-mystery {
+      fill: #F5F5F4;
+    }
+    .text-search {
+      fill: #EF4444;
+    }
+    .text-tagline {
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+      font-weight: bold;
+      fill: #F59E0B;
+      font-size: 11px;
+      letter-spacing: 2px;
+    }
+    .folder-tab-line {
+      stroke: #78350F;
+      stroke-width: 2;
+      fill: none;
+      opacity: 0.6;
+    }
+    .crosshair-element {
+      stroke: #EF4444;
+      stroke-width: 1.5;
+      fill: none;
+    }
+    .crosshair-center {
+      fill: #EF4444;
+    }
+    .glass-frame {
+      stroke: url(#brassGrad);
+      stroke-width: 5;
+      fill: #09090B;
+    }
+    .handle-ridge {
+      stroke: #451A03;
+      stroke-width: 1.2;
+    }
+  </style>
+
+  <g filter="url(#casefile-shadow)">
+    <text x="275" y="95" text-anchor="middle" class="text-title-base">
+      <tspan class="text-mystery">MYSTERY </tspan>
+      <tspan class="text-search">SEARCH</tspan>
+    </text>
+
+    <text x="280" y="160" text-anchor="middle" class="text-tagline">Explore the unknown --- Unsolved Crime and Mysteries</text>
+
+    <path d="M 60,125 L 215,125 L 225,115 L 325,115 L 335,125 L 500,125" class="folder-tab-line" />
+
+    <g transform="rotate(45 275 125)">
+      <circle cx="275" cy="125" r="22" class="glass-frame" />
+
+      <g>
+        <circle cx="275" cy="125" r="1.5" class="crosshair-center" />
+        <circle cx="275" cy="125" r="8" class="crosshair-element" />
+        <line x1="275" y1="112" x2="275" y2="115" class="crosshair-element" />
+        <line x1="275" y1="135" x2="275" y2="138" class="crosshair-element" />
+        <line x1="262" y1="125" x2="265" y2="125" class="crosshair-element" />
+        <line x1="285" y1="125" x2="288" y2="125" class="crosshair-element" />
+      </g>
+
+      <path d="M 257,117 A 19.5 19.5 0 0 1 291,117 A 19.5 19.5 0 0 0 257,117 Z" fill="#FFFFFF" opacity="0.15" />
+
+      <rect x="271.5" y="146" width="7" height="42" rx="2" fill="url(#brass3d)" />
+
+      <line x1="271" y1="151" x2="279" y2="151" class="handle-ridge" />
+      <line x1="271" y1="153" x2="279" y2="153" class="handle-ridge" />
+      <line x1="271" y1="181" x2="279" y2="181" class="handle-ridge" />
+      <line x1="271" y1="183" x2="279" y2="183" class="handle-ridge" />
+    </g>
+  </g>
+</svg>

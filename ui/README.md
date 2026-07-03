@@ -19,6 +19,8 @@ python -m uvicorn search_api.main:app --host 127.0.0.1 --port 8080 --reload
 
 Open http://127.0.0.1:8080
 
+Home page uses `ui/assets/background_homepage.png` (served at `/assets/…`) as a full-viewport `cover` background without stretching.
+
 ## Elasticsearch
 
 1. Copy `.env.example` to `.env`
@@ -32,3 +34,7 @@ Without `ELASTIC_API_KEY`, `/api/search` returns HTTP 503 with a clear error mes
 `GET /api/search?q=jack+ripper&country=United+States&category=murder`
 
 `GET /api/health` — `configured: true` when the API key is set; `elasticsearch: true` when the cluster responds.
+
+`GET /api/page?doc_id=wikipedia:Page_Title` — full page content (all ES sections for that title).
+
+Detail UI: `detail.html?doc_id=...` (linked from search results).

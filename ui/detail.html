@@ -4,39 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Case — Mystery Search</title>
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon" />
+    <link rel="preload" href="/assets/background_homepage.png" as="image" />
+    <link rel="preload" href="/assets/paper_texture.png" as="image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Special+Elite&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
-    <div class="shell">
-      <div class="top-bar">
-        <a class="logo" href="/">Mystery Search</a>
-        <a href="javascript:history.back()">Back to results</a>
-      </div>
+  <body class="page-detail">
+    <div class="detail-shell">
+      <header class="detail-top">
+        <a class="detail-logo" href="/">
+          <img
+            src="/assets/header_logo.svg"
+            alt="Mystery Search"
+            width="550"
+            height="120"
+          />
+        </a>
+        <form class="search-form detail-search-form" id="detail-search-form">
+          <input
+            type="search"
+            id="detail-q"
+            placeholder="Search mysteries…"
+            autocomplete="off"
+            aria-label="Search"
+          />
+          <button type="submit">Search</button>
+        </form>
+      </header>
 
-      <div class="detail-box" id="detail-root">
+      <div id="detail-root">
         <p class="loading">Loading…</p>
       </div>
     </div>
     <script src="/js/search.js"></script>
-    <script>
-      const params = new URLSearchParams(window.location.search);
-      const docId = params.get("doc_id");
-      const root = document.getElementById("detail-root");
-
-      if (!docId) {
-        root.innerHTML =
-          '<p class="alert alert-warn">Missing <code>doc_id</code> in URL.</p>';
-      } else {
-        const title = docId.startsWith("wikipedia:")
-          ? decodeURIComponent(docId.slice("wikipedia:".length))
-          : docId;
-        root.innerHTML = `
-          <h1>${escapeHtml(title)}</h1>
-          <p class="snippet">Full case view coming soon. This stub confirms in-app navigation via <code>doc_id</code>.</p>
-          <p><span class="badge badge-wiki">Wikipedia</span></p>
-          <p class="footer-note">Document id: <code>${escapeHtml(docId)}</code></p>
-        `;
-      }
-    </script>
+    <script src="/js/detail.js"></script>
   </body>
 </html>

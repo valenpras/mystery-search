@@ -19,7 +19,13 @@ def parse_doc_id(doc_id: str) -> str | None:
     if doc_id.startswith("wikipedia:"):
         from urllib.parse import unquote
 
-        return unquote(doc_id[len("wikipedia:") :])
+        raw = doc_id[len("wikipedia:") :]
+        while True:
+            decoded = unquote(raw)
+            if decoded == raw:
+                break
+            raw = decoded
+        return raw
     return None
 
 
@@ -48,7 +54,7 @@ def _case_status_from_source(src: dict[str, Any]) -> str | None:
 
 
 def _category_from_source(src: dict[str, Any]) -> str | None:
-    for key in ("category", "se_category", "SE_Category"):
+    for key in ("SE_category", "category", "se_category", "SE_Category"):
         val = src.get(key)
         if val and str(val).strip() not in ("", "-"):
             return str(val).strip()
@@ -77,6 +83,8 @@ def format_search_response(
     raw: dict[str, Any],
     *,
     source_label: str = SOURCE_WIKIPEDIA,
+    from_: int = 0,
+    size: int | None = None,
 ) -> dict[str, Any]:
     hits = raw.get("hits") or {}
     hit_list = hits.get("hits") or []
@@ -84,13 +92,20 @@ def format_search_response(
 
     results = [hit_to_result(h) for h in hit_list]
     top_score = results[0]["score"] if results else 0.0
-    low_confidence = bool(results) and top_score < get_settings().low_score_threshold
+    low_confidence = (
+        from_ == 0 and bool(results) and top_score < get_settings().low_score_threshold
+    )
+    page_size = size if size is not None else len(results)
+    has_more = len(results) == page_size and page_size > 0
 
     return {
         "query": query,
         "source": source_label,
         "results": results,
+        "from": from_,
+        "size": page_size,
         "total": len(results),
+        "has_more": has_more,
         "took_ms": took_ms,
         "low_confidence": low_confidence,
     }

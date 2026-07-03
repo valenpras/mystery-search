@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 120" width="100%" height="100%" role="img" aria-label="Mystery Search">
+  <defs>
+    <filter id="casefile-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+
+    <linearGradient id="brassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#B45309" />
+      <stop offset="100%" stop-color="#78350F" />
+    </linearGradient>
+  </defs>
+
+  <style>
+    .text-title-base {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: bold;
+      font-size: 28px;
+      letter-spacing: 4px;
+    }
+    .text-mystery {
+      fill: #F5F5F4;
+    }
+    .text-search {
+      fill: #EF4444;
+    }
+    .folder-tab-line {
+      stroke: #78350F;
+      stroke-width: 2;
+      fill: none;
+      opacity: 0.6;
+    }
+    .crosshair-element {
+      stroke: #EF4444;
+      stroke-width: 1.2;
+      fill: none;
+    }
+    .crosshair-center {
+      fill: #EF4444;
+    }
+    .glass-frame {
+      stroke: url(#brassGrad);
+      stroke-width: 4;
+      fill: #09090B;
+    }
+  </style>
+
+  <g filter="url(#casefile-shadow)">
+    <text x="275" y="55" text-anchor="middle" class="text-title-base">
+      <tspan class="text-mystery">MYSTERY </tspan>
+      <tspan class="text-search">SEARCH</tspan>
+    </text>
+
+    <path d="M 60,85 L 235,85 L 245,75 L 305,75 L 315,85 L 500,85" class="folder-tab-line" />
+
+    <g>
+      <circle cx="275" cy="85" r="16" class="glass-frame" />
+
+      <g>
+        <circle cx="275" cy="85" r="1.2" class="crosshair-center" />
+        <circle cx="275" cy="85" r="5.5" class="crosshair-element" />
+        <line x1="275" y1="75" x2="275" y2="77" class="crosshair-element" />
+        <line x1="275" y1="93" x2="275" y2="95" class="crosshair-element" />
+        <line x1="265" y1="85" x2="267" y2="85" class="crosshair-element" />
+        <line x1="283" y1="85" x2="285" y2="85" class="crosshair-element" />
+      </g>
+
+      <ellipse cx="269" cy="79" rx="4" ry="2" transform="rotate(-30 269 79)" fill="#FFFFFF" opacity="0.25" />
+    </g>
+  </g>
+</svg>
